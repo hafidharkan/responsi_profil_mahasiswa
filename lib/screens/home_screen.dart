@@ -1,216 +1,187 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../providers/app_provider.dart';
-import '../config/app_config.dart';
-import '../widgets/empty_state.dart';
-import 'profile_screen.dart';
-import 'note_form_screen.dart';
+import '../models/note.dart';
+import 'edit_profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<dynamic> _publicData = [];
+  final TextEditingController _noteController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    _fetchData();
-  }
-
-  Future<void> _fetchData() async {
-    try {
-      final response = await http
-          .get(Uri.parse('${AppConfig.baseUrl}/users'))
-          .timeout(const Duration(seconds: 10));
-      if (response.statusCode == 200) {
-        setState(() {
-          _publicData = json.decode(response.body);
-        });
-      }
-    } catch (e) {
-      debugPrint('Error fetch (Aman dari data sensitif): $e');
-    }
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final provider = AppProvider.of(context);
-    final notes = provider?.notes ?? [];
+    final student = provider!.student;
+    final notes = provider.notes;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(
-        title: const Text('Catatan & Profil', style: TextStyle(fontWeight: FontWeight.bold)),
-        elevation: 0,
-        backgroundColor: const Color.fromARGB(255, 175, 12, 212),
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person_outline, size: 28),
-            onPressed: () => Navigator.push(
-                context, MaterialPageRoute(builder: (_) => ProfileScreen())),
-          )
-        ],
-      ),
-      body: Column(
-        children: [
-          Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [const Color.fromARGB(255, 120, 4, 244), const Color.fromARGB(255, 129, 35, 218)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color.fromARGB(255, 123, 4, 152).withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                )
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.school, size: 40, color: Colors.white),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        provider?.student.name ?? '',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.white,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+      appBar: AppBar(title: const Text('Dashboard Mahasiswa')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    const CircleAvatar(
+                      radius: 28,
+                      child: Text('M', style: TextStyle(fontSize: 24)),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            student.name,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          const SizedBox(height: 4),
+                          Text('NIM: ${student.nim}'),
+                          const SizedBox(height: 2),
+                          Text(student.programStudi),
+                          const SizedBox(height: 2),
+                          Text(student.email, style: const TextStyle(color: Colors.grey)),
+                        ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        provider?.student.nim ?? '',
-                        style: TextStyle(
-                          color: const Color.fromARGB(255, 243, 242, 244),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Daftar Catatan',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
               ),
             ),
-          ),
+            const SizedBox(height: 12),
 
-          Expanded(
-            child: notes.isEmpty
-                ? EmptyState()
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: notes.length,
-                    itemBuilder: (context, index) {
-                      final note = notes[index];
-                      return Card(
-                        elevation: 2,
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                          title: Text(
-                            note.title,
-                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                          ),
-                          subtitle: Padding(
-                            padding: const EdgeInsets.only(top: 6.0),
-                            child: Row(
-                              children: [
-                                Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade600),
-                                const SizedBox(width: 4),
-                                Text(
-                                  note.date.toString().substring(0, 10),
-                                  style: TextStyle(color: Colors.grey.shade600),
-                                ),
-                              ],
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.edit),
+                label: const Text('Edit Profil Mahasiswa'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditProfileScreen(
+                        currentStudent: student,
+                        onSave: (updatedStudent) {
+                          provider.updateStudent(updatedStudent);
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const Divider(height: 30),
+
+            const Text(
+              'Daftar Catatan Kuliah:',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            
+            Expanded(
+              child: notes.isEmpty
+                  ? const Center(child: Text('Belum ada catatan.'))
+                  : ListView.builder(
+                      itemCount: notes.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          child: ListTile(
+                            title: Text(notes[index].title),
+                            subtitle: Text(notes[index].date.toLocal().toString().split(' ')[0]),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (dialogContext) {
+                                    return AlertDialog(
+                                      title: const Text('Hapus Catatan'),
+                                      content: const Text('Yakin ingin menghapus catatan ini?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(dialogContext),
+                                          child: const Text('Batal'),
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                          onPressed: () {
+                                            provider.deleteNote(index);
+                                            setState(() {});
+                                            Navigator.pop(dialogContext);
+                                          },
+                                          child: const Text('Hapus', style: TextStyle(color: Colors.white)),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
                             ),
                           ),
-                          trailing: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: IconButton(
-                              icon: Icon(Icons.delete_outline, color: Colors.red.shade400),
-                              onPressed: () => _confirmDelete(context, note.id),
-                            ),
-                          ),
-                        ),
-                      );
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+      
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (dialogContext) {
+              return AlertDialog(
+                title: const Text('Tambah Catatan Baru'),
+                content: TextField(
+                  controller: _noteController,
+                  decoration: const InputDecoration(hintText: 'Tulis judul catatan...'),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: const Text('Batal'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_noteController.text.isNotEmpty) {
+                        Note newNote = Note(
+                          id: DateTime.now().millisecondsSinceEpoch.toString(),
+                          title: _noteController.text,
+                          date: DateTime.now(),
+                        );
+                        provider.addNote(newNote);
+                        _noteController.clear();
+                        Navigator.pop(dialogContext);
+                        setState(() {});
+                      }
                     },
+                    child: const Text('Simpan'),
                   ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.push(
-            context, MaterialPageRoute(builder: (_) => NoteFormScreen())),
-        backgroundColor: const Color.fromARGB(255, 136, 7, 222),
-        icon: const Icon(Icons.add),
-        label: const Text('Catatan Baru'),
-      ),
-    );
-  }
-
-  void _confirmDelete(BuildContext context, String id) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Hapus Catatan?'),
-        content: const Text('Tindakan ini tidak dapat dibatalkan.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Batal', style: TextStyle(color: Colors.grey.shade700)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade500,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
-            ),
-            onPressed: () {
-              AppProvider.of(context)!.deleteNote(id);
-              Navigator.pop(ctx);
+                ],
+              );
             },
-            child: const Text('Hapus', style: TextStyle(color: Colors.white)),
-          ),
-        ],
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

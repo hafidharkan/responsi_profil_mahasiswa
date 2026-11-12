@@ -1,4 +1,3 @@
-/// Model metadata catatan. Isi catatan dipisah untuk keamanan.
 class Note {
   String id;
   String title;
