@@ -1,6 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// Service untuk menyimpan isi catatan secara aman.
 class SecureStorageService {
   final _storage = const FlutterSecureStorage();
 

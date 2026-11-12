@@ -1,4 +1,3 @@
-/// Model untuk menyimpan data profil mahasiswa.
 class Student {
   String name;
   String nim;

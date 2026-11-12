@@ -1,4 +1,3 @@
-/// Utility untuk validasi dan sanitasi input form.
 class Validators {
   static String? validateTitle(String? value) {
     if (value == null || value.length < 3 || value.length > 50) {

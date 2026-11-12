@@ -3,7 +3,7 @@ import '../models/student.dart';
 import '../models/note.dart';
 import '../repositories/note_repository.dart';
 
-/// InheritedWidget untuk membagikan state ke seluruh aplikasi.
+
 class AppProvider extends InheritedWidget {
   final Student student;
   final List<Note> notes;
@@ -31,7 +31,6 @@ class AppProvider extends InheritedWidget {
   }
 }
 
-/// Wrapper untuk mengelola state dari AppProvider.
 class AppProviderWrapper extends StatefulWidget {
   final Widget child;
   const AppProviderWrapper({Key? key, required this.child}) : super(key: key);

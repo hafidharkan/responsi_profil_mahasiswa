@@ -1,4 +1,3 @@
-/// Utility untuk validasi dan sanitasi input form.
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AppConfig {
