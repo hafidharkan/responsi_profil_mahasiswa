@@ -44,10 +44,10 @@ class _AppProviderWrapperState extends State<AppProviderWrapper> {
   final NoteRepository _repo = NoteRepository();
   
   Student _student = Student(
-    name: 'Nama Anda', 
-    nim: 'NIM Anda', 
+    name: 'Muhammad Hafidh Arkan Ramadhan', 
+    nim: '25.11.6585', 
     programStudi: 'S1 Informatika', 
-    email: 'email@students.amikom.ac.id'
+    email: 'm.hafidh@students.amikom.ac.id'
   );
   List<Note> _notes = [];
 
